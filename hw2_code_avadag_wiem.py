@@ -109,15 +109,25 @@ def get_type_token_ratio(counts_file):
 #
 
 def get_entropy(unigram_counts_file):
-    return
+
+    uModel = UnigramModel(unigram_counts_file)
+
+    entropy = 0
+
+    for word in uModel.counts:
+        entropy -= (uModel.counts[word]/uModel.total)*uModel.logprob(word)
+
+    return entropy
 
 #
 # Part 3
 #
 
 class BigramModel:
+
     def __init__(self, trainfiles):
         return
+
     def logprob(self, prior_context, target_word):
         return
 
@@ -164,3 +174,8 @@ def part_1():
             f.write(str(cc[i]) + '  ' + str(gt[i]) + '\n')
 
     return
+
+def calculate_entropy():
+    print("NY Times: " + str(get_entropy('nyt_freqmodel.txt')))
+    print("obesity: " + str(get_entropy('obesity_freqmodel.txt')))
+    print("cancer: " + str(get_entropy('cancer_freqmodel.txt')))
