@@ -126,10 +126,74 @@ def get_entropy(unigram_counts_file):
 class BigramModel:
 
     def __init__(self, trainfiles):
+
+        sentences = []
+
+        # get sentences
+        for trainfile in trainfiles:
+            s = get_sentences(trainfile)
+            sentences.extend(s)
+
+        words = get_words(sentences)
+
+        word_counts = {'<UNK>': 0}
+
+        # get word counts
+        for word in words:
+            word_counts[word] = word_counts.get(word, 0) + 1
+
+        one_count_words = []
+
+        # convert all words appearing once to <UNK>
+        for word in word_counts:
+            if(word_counts[word] == 1):
+                word_counts['<UNK>'] += 1
+                one_count_words.append(word)
+
+        for word in one_count_words:
+            del word_counts[word]
+
+        self.word_counts = word_counts
+
+        # add sentence tags
+        self.sentences = ["<s>"+sentence+"</s>" for sentence in sentences]
+
+        word_pair_counts = {}
+
+        # get word pair counts
+        for sentence in self.sentences:
+            words = word_tokenize(sentence)
+            for i in range(3, len(words)-3):
+
+                # first word in a sentence
+                if(i == 3):
+                    word_pair_counts[("<s>", words[i])] = word_pair_counts.get(
+                        ("<s>", words[i]), 0) + 1
+
+                # last word in a sentence
+                if (i == len(words) -4):
+                    word_pair_counts[(words[i], "</s>")] = word_pair_counts.get(
+                        (words[i], "</s>"), 0) + 1
+
+                # in the middle of a sentence
+                else:
+                    word_pair_counts[(words[i], words[i+1])] = word_pair_counts.get(
+                        (words[i], words[i+1]), 0) + 1
+
+        self.word_pair_counts = word_pair_counts
+
+        self.V = len(word_counts)
+
         return
 
     def logprob(self, prior_context, target_word):
-        return
+
+        c_pair = self.word_pair_counts.get((prior_context, target_word), 0)
+        c_context = self.word_counts.get(prior_context, self.word_counts.get("<UNK>"))
+
+        prob = (c_pair + 0.25)/(c_context + 0.25*self.V)
+
+        return math.log(prob,2)
 
 #
 # Part 4
