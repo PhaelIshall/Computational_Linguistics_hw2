@@ -17,7 +17,7 @@ def get_words(sentences):
     return flatten([word_tokenize(sentence) for sentence in sentences])
 
 def get_freqs(file):
-    
+
     freqs = {}
     words = get_words(get_sentences(file))
     for word in words:
@@ -39,12 +39,12 @@ def file_to_freqmodel(infile, outfile):
 #
 
 class UnigramModel:
-    
+
     def __init__(self, freqmodel):
 
         counts = {}
         total = 0
-        
+
         f = open(freqmodel, 'r')
         for line in f.readlines():
             s = line.rsplit(',',1)
@@ -55,7 +55,7 @@ class UnigramModel:
         self.total = total
 
         return
-    
+
     def logprob(self, target_word):
 
         if(target_word in self.counts):
@@ -102,7 +102,16 @@ def get_good_turing(frequency_model):
 #
 
 def get_type_token_ratio(counts_file):
-    return
+
+    with open(counts_file, "r") as f:
+        content = f.readlines()
+    content = [x.strip() for x in content]
+    tokens = 0
+    types = 0
+    for l in content:
+        types+=1
+        tokens+= int(l.rsplit(",", 1)[1])
+    return float(types)/float(tokens)
 
 #
 # Part 2.3
