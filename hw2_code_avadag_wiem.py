@@ -222,25 +222,20 @@ def srilm_preprocess(raw_text, temp_file):
 
 
 def srilm_bigram_models(input_file, output_dir):
-    temp = "temp"+input_file
-    temp_input_file = srilm_preprocess(input_file, temp)
     file_name = os.path.basename(input_file)
-#    cmd1 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 1 -addsmooth 0.25' % ( temp_input_file, file_name+'.uni.lm_100' )
+    temp = "temp"+file_name
+    temp_input_file = srilm_preprocess(input_file, temp)
+    
+    cmd1 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 1 -addsmooth 0.25' % ( temp_input_file, file_name+'.uni.lm_100' )
     cmd2 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 2 -addsmooth 0.25' % ( temp_input_file, file_name+'.bi.lm_100' )
-#    cmd3 = '/home1/c/cis530/srilm/ngram-count  -text %s -lm %s -order 2 -kndiscount' % ( temp_input_filee, file_name+'.bi.kn.lm_100' )
+    cmd3 = '/home1/c/cis530/srilm/ngram-count  -text %s -lm %s -order 2 -kndiscount' % ( temp_input_file, file_name+'.bi.kn.lm_100' )
+    
     os.system(cmd1)
     os.system(cmd2)
     os.system(cmd3)
     
     return
 
-#srilm_bigram_models("/home1/c/cis530/hw2/data/train/obesity.txt", "~/html")
-srilm_bigram_models("/home1/c/cis530/hw2/data/train/cancer.txt", "~/html")
-#srilm_bigram_models("/home1/c/cis530/hw2/data/train/nytimes.txt", "~/html")
-
-
-
-#srilm_preprocess("obesity.txt","obesityTemp.txt")
 
 
 
