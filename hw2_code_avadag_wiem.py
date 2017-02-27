@@ -226,13 +226,13 @@ def srilm_bigram_models(input_file, output_dir):
     temp = "temp"+file_name
     temp_input_file = srilm_preprocess(input_file, temp)
     
-    cmd1 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 1 -addsmooth 0.25' % ( temp_input_file, file_name+'.uni.lm_100' )
-    cmd2 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 2 -addsmooth 0.25' % ( temp_input_file, file_name+'.bi.lm_100' )
-    cmd3 = '/home1/c/cis530/srilm/ngram-count  -text %s -lm %s -order 2 -kndiscount' % ( temp_input_file, file_name+'.bi.kn.lm_100' )
+    cmd1 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 1 -addsmooth 0.25' % ( temp_input_file, file_name+'.uni.lm' )
+    cmd2 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 2 -addsmooth 0.25' % ( temp_input_file, file_name+'.bi.lm' )
+    cmd3 = '/home1/c/cis530/srilm/ngram-count  -text %s -lm %s -order 2 -kndiscount' % ( temp_input_file, file_name+'.bi.kn.lm' )
     
     os.system(cmd1)
-#    os.system(cmd2)
-#    os.system(cmd3)
+    os.system(cmd2)
+    os.system(cmd3)
 
     return
 
