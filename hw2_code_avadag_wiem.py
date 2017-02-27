@@ -1,7 +1,7 @@
 "#!/usr/bin/python3"
 from nltk import word_tokenize, sent_tokenize
 import math
-
+import os
 #
 # PRE-PROCESSING
 #
@@ -207,12 +207,42 @@ class BigramModel:
 #
 # Part 4
 #
+def srilm_ppl(model_file, raw_text):
+    file_name = os.path.basename(raw_text)
+    test_file = srilm_preprocess(raw_text, "temp"+file_name)
+    cmd = '/home1/c/cis530/srilm/ngram -lm %s -ppl %s' % ( model_file, test_file)
+    os.system(cmd)
+
+def srilm_preprocess(raw_text, temp_file):
+    f = open(temp_file, "w+")
+    list_of_sentences = get_sentences(raw_text)
+    for sentence in list_of_sentences:
+        f.write(sentence+"\n")
+    return temp_file
+
 
 def srilm_bigram_models(input_file, output_dir):
+    temp = "temp"+input_file
+    temp_input_file = srilm_preprocess(input_file, temp)
+    file_name = os.path.basename(input_file)
+#    cmd1 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 1 -addsmooth 0.25' % ( temp_input_file, file_name+'.uni.lm_100' )
+    cmd2 = '/home1/c/cis530/srilm/ngram-count -text %s -lm %s -order 2 -addsmooth 0.25' % ( temp_input_file, file_name+'.bi.lm_100' )
+#    cmd3 = '/home1/c/cis530/srilm/ngram-count  -text %s -lm %s -order 2 -kndiscount' % ( temp_input_filee, file_name+'.bi.kn.lm_100' )
+    os.system(cmd1)
+    os.system(cmd2)
+    os.system(cmd3)
+    
     return
 
-def srilm_ppl(model_file, raw_text):
-    return
+#srilm_bigram_models("/home1/c/cis530/hw2/data/train/obesity.txt", "~/html")
+srilm_bigram_models("/home1/c/cis530/hw2/data/train/cancer.txt", "~/html")
+#srilm_bigram_models("/home1/c/cis530/hw2/data/train/nytimes.txt", "~/html")
+
+
+
+#srilm_preprocess("obesity.txt","obesityTemp.txt")
+
+
 
 #
 # Running code
