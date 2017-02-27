@@ -231,10 +231,11 @@ def srilm_bigram_models(input_file, output_dir):
     cmd3 = '/home1/c/cis530/srilm/ngram-count  -text %s -lm %s -order 2 -kndiscount' % ( temp_input_file, file_name+'.bi.kn.lm_100' )
     
     os.system(cmd1)
-    os.system(cmd2)
-    os.system(cmd3)
-    
+#    os.system(cmd2)
+#    os.system(cmd3)
+
     return
+
 
 
 
