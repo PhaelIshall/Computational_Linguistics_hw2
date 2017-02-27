@@ -237,8 +237,59 @@ def srilm_bigram_models(input_file, output_dir):
     return
 
 
+#
+# Part 5
+#
 
 
+def get_file_info(file):
+    freq = get_freqs(file)
+    ny = list(get_freqs("nytimes.txt"))
+    
+    #nyt_fract
+    diff = list(set(freq) - set(ny))
+    nyt_fract = len(diff)
+    
+    #vocab)size
+    vocab_size = len(freq)
+    
+    
+    #Getting frac_freq
+    count = 0
+    
+    for i in freq.keys():
+        if freq[i] > 5:
+            count = count + 1
+    total = float(len(freq))
+    fraq_freq = float(count)/total
+
+    #frac_rare
+    frac_rare = 0
+    word_lengths = 0
+    for word in freq:
+        word_lengths+= len(word)
+        if freq[word] == 1:
+            frac_rare+=1
+
+    #average_word
+    average_word = float(word_lengths)/total
+    list_keys = sorted(freq, key=freq.__getitem__)
+    #median_word length
+    median_word_ = list_keys[int(len(freq)/2)]
+    median_word = len(median_word_)
+
+
+    print(vocab_size)
+    print(fraq_freq)
+    print(frac_rare)
+    print(average_word)
+    print(median_word)
+    print(nyt_fract)
+    
+    return
+
+
+get_file_info("obesity.txt")
 
 #
 # Running code
