@@ -1,0 +1,25 @@
+For this problem, we essentially just combined all of our metrics that we calculated in part 2.
+
+For each of the metrics, we decided what sort of measurement would correspond to increased difficulty:
+
+- High entropy
+- High type/token ratio
+- High vocab size
+- Low frac_freq
+- High frac_rare
+- High median word
+- High average word
+- High frac_nyt
+
+For each of these metrics, we weighted them according to relative insight that they provide. If a metric is worth x points, then each abstract receives a score from 0 to x for that particular metric. These scores are given on a linear sliding scale between the min and max of the group. The scores of the metrics are summed. If an abstract is the "most readable" for every metric, it will receive a score of 0. If it is the "least readable" for every metric, it will receive a score of 10.
+
+Here is how we weighed each metric:
+
+- entropy: 2 pts
+- type/token ratio: 2 pts
+- vocab size: 0.5 pt (may just be a particularly long text)
+- frac_freq: 1 pt
+- frac_rare: 1 pt
+- median word: 0.5 pts
+- average word: 1 pts (average is more indicative than median because it doesn't ignore outliers, which may be particularly challenging words)
+- frac_nyt: 2 pts (NY Times is generally easy to read)

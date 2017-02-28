@@ -17,6 +17,7 @@ def get_sentences(file):
 def get_words(sentences):
     return flatten([word_tokenize(sentence) for sentence in sentences])
 
+# same as get_freqs but for a string instead of a file
 def get_string_freqs(s):
     freqs = {}
     words = get_words(sent_tokenize(s))
@@ -59,6 +60,7 @@ class UnigramModel:
             counts[s[0]] = int(s[1])
             total += int(s[1])
 
+        # internally store counts as a dict and total number of tokens
         self.counts = counts
         self.total = total
 
@@ -75,7 +77,7 @@ class UnigramModel:
 # Part 1.2
 #
 
-#helper function
+# helper function
 def get_count_counts(frequency_model):
 
     counts = {}
@@ -170,9 +172,10 @@ class BigramModel:
         for word in one_count_words:
             del word_counts[word]
 
+        # store individual word counts
         self.word_counts = word_counts
 
-        # add sentence tags
+        # store sentences
         self.sentences = sentences
 
         word_pair_counts = {}
@@ -199,8 +202,10 @@ class BigramModel:
                     word_pair_counts[(words[i], words[i+1])] = word_pair_counts.get(
                         (words[i], words[i+1]), 0) + 1
 
+        # store word pair counts
         self.word_pair_counts = word_pair_counts
 
+        # store the vocab size
         self.V = len(word_counts)
 
         return
@@ -346,18 +351,15 @@ def get_readability_scores(excerpts):
         scores[i] = 0
         scores[i] += 2*(attributes[i][6]-tt_min)/(tt_max-tt_min)
         scores[i] += 2*(attributes[i][7]-e_min)/(e_max-e_min)
-        scores[i] += (attributes[i][0]-vs_min)/(vs_max-vs_min)
+        scores[i] += 0.5*(attributes[i][0]-vs_min)/(vs_max-vs_min)
         scores[i] += (ff_max-attributes[i][1])/(ff_max-ff_min)
         scores[i] += (attributes[i][2]-fr_min)/(fr_max-fr_min)
         scores[i] += (attributes[i][3]-aw_min)/(aw_max-aw_min)
-        scores[i] += (attributes[i][4]-mw_min)/(mw_max-mw_min)
-        scores[i] += (fn_max-attributes[i][5])/(fn_max-fn_min)
+        scores[i] += 0.5*(attributes[i][4]-mw_min)/(mw_max-mw_min)
+        scores[i] += 2*(fn_max-attributes[i][5])/(fn_max-fn_min)
 
 
     return scores
-
-
-get_file_info("obesity.txt")
 
 #
 # Running code
@@ -400,6 +402,8 @@ def calculate_entropy():
 
 def readability():
     with open('data/test/cloze.txt') as f:
-        print(get_readability_scores(f.readlines()))
-
-readability()
+        scores = get_readability_scores(f.readlines())
+        with open('readability.txt', 'w+') as f_out:
+            for i in range(0, len(scores)):
+                f_out.write(str(scores[i])+'\n')
+    return
