@@ -2,6 +2,7 @@
 from nltk import word_tokenize, sent_tokenize
 import math
 import os
+import statistics
 #
 # PRE-PROCESSING
 #
@@ -15,6 +16,13 @@ def get_sentences(file):
 
 def get_words(sentences):
     return flatten([word_tokenize(sentence) for sentence in sentences])
+
+def get_string_freqs(s):
+    freqs = {}
+    words = get_words(sent_tokenize(s))
+    for word in words:
+        freqs[word] = freqs.get(word, 0) + 1
+    return freqs
 
 def get_freqs(file):
 
@@ -165,22 +173,24 @@ class BigramModel:
         self.word_counts = word_counts
 
         # add sentence tags
-        self.sentences = ["<s>"+sentence+"</s>" for sentence in sentences]
+        self.sentences = sentences
 
         word_pair_counts = {}
 
         # get word pair counts
         for sentence in self.sentences:
-            words = word_tokenize(sentence)
-            for i in range(3, len(words)-3):
+            words = ["<s>"]
+            words.extend(word_tokenize(sentence))
+            words.append("</s>")
+            for i in range(1, len(words)-1):
 
                 # first word in a sentence
-                if(i == 3):
+                if(i == 1):
                     word_pair_counts[("<s>", words[i])] = word_pair_counts.get(
                         ("<s>", words[i]), 0) + 1
 
                 # last word in a sentence
-                if (i == len(words) -4):
+                if (i == len(words) -2):
                     word_pair_counts[(words[i], "</s>")] = word_pair_counts.get(
                         (words[i], "</s>"), 0) + 1
 
@@ -242,15 +252,16 @@ def srilm_bigram_models(input_file, output_dir):
 #
 
 
-def get_file_info(file):
-    freq = get_freqs(file)
+def get_file_info(excerpt):
+
+    freq = get_string_freqs(excerpt)
     ny = list(get_freqs("nytimes.txt"))
     
     #nyt_fract
     diff = list(set(freq) - set(ny))
-    nyt_fract = len(diff)
+    nyt_fract = len(diff)/len(freq)
     
-    #vocab)size
+    #vocab_size
     vocab_size = len(freq)
     
     
@@ -260,8 +271,7 @@ def get_file_info(file):
     for i in freq.keys():
         if freq[i] > 5:
             count = count + 1
-    total = float(len(freq))
-    fraq_freq = float(count)/total
+    frac_freq = float(count)/vocab_size
 
     #frac_rare
     frac_rare = 0
@@ -271,22 +281,80 @@ def get_file_info(file):
         if freq[word] == 1:
             frac_rare+=1
 
+    frac_rare /= vocab_size
+
     #average_word
-    average_word = float(word_lengths)/total
-    list_keys = sorted(freq, key=freq.__getitem__)
-    #median_word length
-    median_word_ = list_keys[int(len(freq)/2)]
-    median_word = len(median_word_)
-
-
-    print(vocab_size)
-    print(fraq_freq)
-    print(frac_rare)
-    print(average_word)
-    print(median_word)
-    print(nyt_fract)
+    average_word = float(word_lengths)/vocab_size
     
-    return
+    #median_word length
+    median_word = statistics.median([len(word) for word in freq])
+
+    # type_token ratio
+    type_token = float(vocab_size)/len(get_words(sent_tokenize(excerpt)))
+
+    #entropy
+    total_freqs = 0
+    for word in freq:
+        total_freqs += freq[word]
+    entropy = 0
+    for word in freq:
+        prob = freq[word]/total_freqs
+        entropy -= prob*math.log(prob,2)
+    
+    return (vocab_size, frac_freq, frac_rare, average_word, median_word, nyt_fract, type_token, entropy)
+
+def get_readability_scores(excerpts):
+
+    attributes = {}
+
+    # calculate attributes
+    for i in range(0, len(excerpts)):
+        attributes[i] = get_file_info(excerpts[i])
+
+    vals = attributes.values()
+
+    # get max and min
+    
+    vs_max = max([val[0] for val in vals])
+    vs_min = min([val[0] for val in vals])
+
+    ff_max = max([val[1] for val in vals])
+    ff_min = min([val[1] for val in vals])
+
+    fr_max = max([val[2] for val in vals])
+    fr_min = min([val[2] for val in vals])
+
+    aw_max = max([val[3] for val in vals])
+    aw_min = min([val[3] for val in vals])
+
+    mw_max = max([val[4] for val in vals])
+    mw_min = min([val[4] for val in vals])
+
+    fn_max = max([val[5] for val in vals])
+    fn_min = min([val[5] for val in vals])
+
+    tt_max = max([val[6] for val in vals])
+    tt_min = min([val[6] for val in vals])
+
+    e_max = max([val[7] for val in vals])
+    e_min = min([val[7] for val in vals])
+
+    # calculate scores
+    scores = {}
+
+    for i in range(0, len(excerpts)):
+        scores[i] = 0
+        scores[i] += 2*(attributes[i][6]-tt_min)/(tt_max-tt_min)
+        scores[i] += 2*(attributes[i][7]-e_min)/(e_max-e_min)
+        scores[i] += (attributes[i][0]-vs_min)/(vs_max-vs_min)
+        scores[i] += (ff_max-attributes[i][1])/(ff_max-ff_min)
+        scores[i] += (attributes[i][2]-fr_min)/(fr_max-fr_min)
+        scores[i] += (attributes[i][3]-aw_min)/(aw_max-aw_min)
+        scores[i] += (attributes[i][4]-mw_min)/(mw_max-mw_min)
+        scores[i] += (fn_max-attributes[i][5])/(fn_max-fn_min)
+
+
+    return scores
 
 
 get_file_info("obesity.txt")
@@ -329,3 +397,9 @@ def calculate_entropy():
     print("NY Times: " + str(get_entropy('nyt_freqmodel.txt')))
     print("obesity: " + str(get_entropy('obesity_freqmodel.txt')))
     print("cancer: " + str(get_entropy('cancer_freqmodel.txt')))
+
+def readability():
+    with open('data/test/cloze.txt') as f:
+        print(get_readability_scores(f.readlines()))
+
+readability()
