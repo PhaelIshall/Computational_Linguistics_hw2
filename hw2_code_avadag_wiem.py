@@ -286,7 +286,6 @@ def get_file_info(excerpt):
         if freq[word] == 1:
             frac_rare+=1
 
-<<<<<<< HEAD
     frac_rare /= vocab_size
 
     #average_word
