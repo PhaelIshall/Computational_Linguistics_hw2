@@ -264,7 +264,7 @@ def get_file_info(excerpt):
     
     #nyt_fract
     diff = list(set(freq) - set(ny))
-    nyt_fract = len(diff)/len(freq)
+    nyt_fract = 1 - len(diff)/len(freq)
     
     #vocab_size
     vocab_size = len(freq)
@@ -286,6 +286,7 @@ def get_file_info(excerpt):
         if freq[word] == 1:
             frac_rare+=1
 
+<<<<<<< HEAD
     frac_rare /= vocab_size
 
     #average_word
@@ -406,4 +407,5 @@ def readability():
         with open('readability.txt', 'w+') as f_out:
             for i in range(0, len(scores)):
                 f_out.write(str(scores[i])+'\n')
+
     return
